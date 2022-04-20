@@ -59,7 +59,10 @@ jobs:
           - {os: ubuntu-latest, python: 3.7, ffmpeg: "5.0", extras: true}
           - {os: ubuntu-latest, python: 3.7, ffmpeg: "4.4"}
           - {os: ubuntu-latest, python: 3.7, ffmpeg: "4.3"}
+          - {os: ubuntu-latest, python: 3.7, ffmpeg: "4.2"}
+          - {os: ubuntu-latest, python: pypy3, ffmpeg: "5.0"}
           - {os: ubuntu-latest, python: pypy3, ffmpeg: "4.4"}
+          - {os: macos-latest,  python: 3.7, ffmpeg: "5.0"}
           - {os: macos-latest,  python: 3.7, ffmpeg: "4.4"}
 
     env:
@@ -147,6 +150,7 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, python: 3.7, ffmpeg: "4.3"}
+          - {os: windows-latest, python: 3.7, ffmpeg: "4.2"}
 
     steps:
 
