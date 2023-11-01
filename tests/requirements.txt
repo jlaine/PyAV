@@ -1,4 +1,5 @@
 autopep8
+black
 Cython
 editorconfig
 flake8

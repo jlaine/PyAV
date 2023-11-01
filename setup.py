@@ -139,7 +139,7 @@ else:
 
 # Construct the modules that we find in the "av" directory.
 ext_modules = []
-for dirname, dirnames, filenames in os.walk("av"):
+for dirname, dirnames, filenames in os.walk("src/av"):
     for filename in filenames:
         # We are looking for Cython sources.
         if filename.startswith(".") or os.path.splitext(filename)[1] != ".pyx":
@@ -151,6 +151,7 @@ for dirname, dirnames, filenames in os.walk("av"):
         # Need to be a little careful because Windows will accept / or \
         # (where os.sep will be \ on Windows).
         mod_name = base.replace("/", ".").replace(os.sep, ".")
+        mod_name = mod_name[len("src.") :]
 
         # Cythonize the module.
         ext_modules += cythonize(
@@ -167,20 +168,17 @@ for dirname, dirnames, filenames in os.walk("av"):
                 embedsignature=True,
                 language_level=2,
             ),
-            build_dir="src",
             include_path=["include"],
         )
 
 
 # Read package metadata
 about = {}
-about_file = os.path.join(os.path.dirname(__file__), "av", "about.py")
+about_file = os.path.join(os.path.dirname(__file__), "src", "av", "about.py")
 with open(about_file, encoding="utf-8") as fp:
     exec(fp.read(), about)
 
-package_folders = pathlib.Path("av").glob("**/")
-package_data = {".".join(pckg.parts): ["*.pxd"] for pckg in package_folders}
-
+packages = find_packages(where="src")
 
 setup(
     name="av",
@@ -189,8 +187,9 @@ setup(
     author="Mike Boers",
     author_email="pyav@mikeboers.com",
     url="https://github.com/PyAV-Org/PyAV",
-    packages=find_packages(exclude=["build*", "examples*", "scratchpad*", "tests*"]),
-    package_data=package_data,
+    packages=packages,
+    package_data={pkg: ["*.pxd"] for pkg in packages},
+    package_dir={"": "src"},
     python_requires=">=3.8",
     zip_safe=False,
     ext_modules=ext_modules,

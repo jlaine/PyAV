@@ -17,7 +17,6 @@ cythonize:
 	$(PYTHON) setup.py cythonize
 
 
-
 wheel: build-mingw32
 	$(PYTHON) setup.py bdist_wheel
 
@@ -34,8 +33,9 @@ fate-suite:
 	rsync -vrltLW rsync://fate-suite.ffmpeg.org/fate-suite/ tests/assets/fate-suite/
 
 lint:
-	TESTSUITE=flake8 scripts/test
-	TESTSUITE=isort scripts/test
+	black --check examples src tests
+	flake8 examples src tests
+	isort --check-only --diff examples src tests
 
 test:
 	$(PYTHON) setup.py test

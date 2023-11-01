@@ -12,6 +12,7 @@
 /venvs
 
 # Build products
+*.c
 *.dll
 *.egg-info
 *.lib
@@ -20,16 +21,13 @@
 /*.sdf
 /*.sln
 /*.suo
-/av/**/*.exp
-/av/**/*.lib
-/av/**/*.pdb
-/av/**/*.pyd
 /build
 /dist
 /docs/_build
-/ipch
 /msvc-projects
-/src
+/src/av/**/*.exp
+/src/av/**/*.pdb
+/src/av/**/*.pyd
 
 # Testing.
 *.spyderproject

@@ -12,41 +12,19 @@ on:
       - '**.txt'
 jobs:
   style:
-    name: "${{ matrix.config.suite }}"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        config:
-          - {suite: black}
-          - {suite: flake8}
-          - {suite: isort}
-
-    env:
-      PYAV_PYTHON: python3
-      PYAV_LIBRARY: ffmpeg-4.3 # doesn't matter
 
     steps:
-      - uses: actions/checkout@v4
-        name: Checkout
-
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-
-      - name: Environment
-        run: env | sort
-
       - name: Packages
-        run: |
-          . scripts/activate.sh
-          # A bit of a hack that we can get away with this.
-          python -m pip install ${{ matrix.config.suite }}
-
-      - name: "${{ matrix.config.suite }}"
-        run: |
-          . scripts/activate.sh
-          ./scripts/test ${{ matrix.config.suite }}
+        run: pip install -r tests/requirements.txt
+      - name: Linters
+        run: make lint
 
   nix:
     name: "py-${{ matrix.config.python }} lib-${{ matrix.config.ffmpeg }} ${{matrix.config.os}}"
@@ -244,7 +222,7 @@ jobs:
           CIBW_ENVIRONMENT_WINDOWS: INCLUDE=C:\\cibw\\vendor\\include LIB=C:\\cibw\\vendor\\lib PYAV_SKIP_TESTS=unicode_filename
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: delvewheel repair --add-path C:\cibw\vendor\bin -w {dest_dir} {wheel}
           CIBW_SKIP: cp36-* pp36-* pp38-win* *-musllinux*
-          CIBW_TEST_COMMAND: mv {project}/av {project}/av.disabled && python -m unittest discover -t {project} -s tests && mv {project}/av.disabled {project}/av
+          CIBW_TEST_COMMAND: python -m unittest discover -t {project} -s tests
           CIBW_TEST_REQUIRES: numpy
           # skip tests when there are no binary wheels of numpy
           CIBW_TEST_SKIP: pp* *_i686
