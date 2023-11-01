@@ -10,6 +10,11 @@ on:
       - '**.md'
       - '**.rst'
       - '**.txt'
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   style:
     runs-on: ubuntu-latest
@@ -47,8 +52,8 @@ jobs:
       PYAV_LIBRARY: ffmpeg-${{ matrix.config.ffmpeg }}
 
     steps:
-    - uses: actions/checkout@v4
-      name: Checkout
+    - name: Checkout
+      uses: actions/checkout@v4
 
     - name: Python ${{ matrix.config.python }}
       uses: actions/setup-python@v4
@@ -121,37 +126,32 @@ jobs:
           - {os: windows-latest, python: 3.8, ffmpeg: "5.1"}
           - {os: windows-latest, python: 3.8, ffmpeg: "5.0"}
 
+    env:
+      VENDOR_PATH: "C:\\cibw\\vendor"
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Conda
-      shell: bash
+    - name: Python ${{ matrix.config.python }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.config.python }}
+
+    - name: Pip and FFmpeg
       run: |
-        . $CONDA/etc/profile.d/conda.sh
-        conda config --set always_yes true
-        conda config --add channels conda-forge
-        conda create -q -n pyav \
-          cython \
-          numpy \
-          pillow \
-          python=${{ matrix.config.python }} \
-          setuptools
+        pip install -r tests\\requirements.txt
+        python scripts\\fetch-vendor.py --config-file scripts\\ffmpeg-${{ matrix.config.ffmpeg }}.json $VENDOR_PATH
+        echo "$VENDOR_PATH\\bin -> $GITHUB_PATH"
+        echo "$VENDOR_PATH\\bin" >> $GITHUB_PATH
 
     - name: Build
-      shell: bash
       run: |
-        . $CONDA/etc/profile.d/conda.sh
-        conda activate pyav
-        python scripts\\fetch-vendor.py --config-file scripts\\ffmpeg-${{ matrix.config.ffmpeg }}.json $CONDA_PREFIX\\Library
-        python setup.py build_ext --inplace --ffmpeg-dir=$CONDA_PREFIX\\Library
+        echo $PATH
+        python setup.py build_ext --inplace --ffmpeg-dir=$VENDOR_PATH
 
     - name: Test
-      shell: bash
-      run: |
-        . $CONDA/etc/profile.d/conda.sh
-        conda activate pyav
-        python setup.py test
+      run: python setup.py test
 
   package-source:
     runs-on: ubuntu-latest
@@ -220,7 +220,6 @@ jobs:
         run: |
           pip install cibuildwheel delvewheel
           cibuildwheel --output-dir dist
-        shell: bash
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
